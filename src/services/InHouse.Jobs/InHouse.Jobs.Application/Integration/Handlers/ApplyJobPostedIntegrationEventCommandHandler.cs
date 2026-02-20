@@ -10,8 +10,7 @@ public sealed class ApplyJobPostedIntegrationEventCommandHandler
 {
     private readonly IJobRepository _repository;
 
-    public ApplyJobPostedIntegrationEventCommandHandler(
-        IJobRepository repository)
+    public ApplyJobPostedIntegrationEventCommandHandler(IJobRepository repository)
     {
         _repository = repository;
     }
@@ -20,13 +19,9 @@ public sealed class ApplyJobPostedIntegrationEventCommandHandler
         ApplyJobPostedIntegrationEventCommand request,
         CancellationToken ct)
     {
-        // Idempotent safety at domain level (defensive)
         var existing = await _repository.GetByIdAsync(request.JobId, ct);
         if (existing is not null)
-        {
-            // Already applied
             return;
-        }
 
         var job = new Job(
             request.JobId,

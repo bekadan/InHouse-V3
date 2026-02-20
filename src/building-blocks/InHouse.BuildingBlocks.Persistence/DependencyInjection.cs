@@ -1,4 +1,5 @@
 ﻿using InHouse.BuildingBlocks.Abstractions;
+using InHouse.BuildingBlocks.Abstractions.Messaging;
 using InHouse.BuildingBlocks.Application.Abstractions;
 using InHouse.BuildingBlocks.Persistence.Auditing;
 using InHouse.BuildingBlocks.Persistence.CompiledQueries;
@@ -43,6 +44,8 @@ public static class DependencyInjection
         services.AddScoped<SaveChangesInterceptor, AuditAndSoftDeleteSaveChangesInterceptor>();
 
         services.AddScoped<SoftDelete.ISoftDeleteFilterProvider, SoftDelete.SoftDeleteFilterProvider>();
+
+        services.AddScoped<IIntegrationEventPublisher, EfCoreIntegrationEventPublisher>();
 
         return services;
     }

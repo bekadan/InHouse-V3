@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\building-blocks\InHouse.BuildingBlocks.Api\InHouse.BuildingBlocks.Api.csproj" />
+    <ProjectReference Include="..\..\..\building-blocks\InHouse.BuildingBlocks.Messaging\InHouse.BuildingBlocks.Messaging.csproj" />
     <ProjectReference Include="..\InHouse.Jobs.Persistence\InHouse.Jobs.Persistence.csproj" />
   </ItemGroup>
 

@@ -1,6 +1,10 @@
 ﻿using InHouse.BuildingBlocks.Abstractions;
+using InHouse.BuildingBlocks.Api;
+using InHouse.BuildingBlocks.Messaging.Kafka;
 using InHouse.BuildingBlocks.Persistence;
 using InHouse.BuildingBlocks.Persistence.Tenancy;
+using InHouse.Jobs.Api;
+using InHouse.Jobs.Api.Endpoints;
 using InHouse.Jobs.Api.Middleware;
 using InHouse.Jobs.Api.Security;
 using InHouse.Jobs.Api.Tenancy;
@@ -43,6 +47,17 @@ builder.Services.AddOpenTelemetry()
             .AddPrometheusExporter();
     });
 
+builder.Services
+    .AddIntegrationVersioning()
+    .AddJobsEventUpcasters()
+    .AddJobsIntegrationHandlers();
+
+// Kafka messaging (infra)
+builder.Services.AddKafkaMessaging(builder.Configuration);
+
+// Inbox runner infra (senin mevcut)
+builder.Services.AddIntegrationConsumerInfrastructure();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -60,6 +75,8 @@ app.MapHealthChecks("/healthz");
 app.Services.GetRequiredService<OutboxGaugeProvider>();
 
 app.UseOpenTelemetryPrometheusScrapingEndpoint("/metrics");
+
+app.MapAdminReplayEndpoints();
 
 app.UseHttpsRedirection();
 
@@ -96,3 +113,17 @@ await _mediator.Send(new ApplyJobPostedIntegrationEventCommand(
         == true ? actor : "system"
 ), ct); */
 
+/*
+ * Replay nasıl kullanılır?
+ {
+  "tenantId": "tenant-123",
+  "eventType": "Jobs.JobPosted",
+  "eventVersion": 2,
+  "occurredFromUtc": "2026-02-01T00:00:00Z",
+  "occurredToUtc": "2026-02-20T00:00:00Z",
+  "forceReprocess": true,
+  "requestedBy": "burak.emre",
+  "reason": "Projection rebuild after schema fix"
+}
+ 
+ */

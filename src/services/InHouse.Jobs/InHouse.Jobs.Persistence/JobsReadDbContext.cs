@@ -1,4 +1,5 @@
-﻿using InHouse.BuildingBlocks.Persistence.SoftDelete;
+﻿using InHouse.BuildingBlocks.Persistence.ReadModels;
+using InHouse.BuildingBlocks.Persistence.SoftDelete;
 using InHouse.BuildingBlocks.Persistence.Tenancy;
 using InHouse.Jobs.Domain;
 using InHouse.Jobs.Domain.Entities;
@@ -23,6 +24,7 @@ public sealed class JobsReadDbContext : DbContext
         _softDelete = softDelete;
     }
 
+    public DbSet<JobListItem> JobList => Set<JobListItem>();
     public DbSet<Job> Jobs => Set<Job>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

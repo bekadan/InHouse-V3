@@ -1,4 +1,10 @@
 ﻿using InHouse.BuildingBlocks.Abstractions;
+using InHouse.BuildingBlocks.Abstractions.Integration.Inbox;
+using InHouse.BuildingBlocks.Abstractions.Integration.Versioning;
+using InHouse.BuildingBlocks.Abstractions.Messaging;
+using InHouse.BuildingBlocks.Api.Integration.Inbox;
+using InHouse.BuildingBlocks.Api.Integration.Publishing;
+using InHouse.BuildingBlocks.Api.Integration.Versioning;
 using InHouse.BuildingBlocks.Api.Middleware;
 using InHouse.BuildingBlocks.Api.Observability;
 using InHouse.BuildingBlocks.Api.Security;
@@ -19,7 +25,9 @@ public static class DependencyInjection
         services.AddScoped<ITenantContext, HttpTenantContext>();
         services.AddScoped<ICurrentUser, HttpCurrentUser>();
         services.AddScoped<IEventContextAccessor, HttpEventContextAccessor>();
-
+        services.AddScoped<IIntegrationEventPublisher, MessageBusIntegrationEventPublisher>();
+        services.AddScoped<InboxBypassScope>();
+        services.AddScoped<IInboxBypassScope>(sp => sp.GetRequiredService<InboxBypassScope>());
         return services;
     }
 
@@ -32,5 +40,12 @@ public static class DependencyInjection
         app.UseMiddleware<TenantResolutionMiddleware>();
 
         return app;
+    }
+
+    public static IServiceCollection AddIntegrationVersioning(this IServiceCollection services)
+    {
+        services.AddSingleton<IEventUpcasterRegistry, DefaultEventUpcasterRegistry>();
+        services.AddSingleton<IEventUpcastingPipeline, EventUpcastingPipeline>();
+        return services;
     }
 }

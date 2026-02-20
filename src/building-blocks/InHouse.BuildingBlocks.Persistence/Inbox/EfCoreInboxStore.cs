@@ -7,8 +7,12 @@ public sealed class EfCoreInboxStore<TWriteDbContext> : IInboxStore
     where TWriteDbContext : DbContext
 {
     private readonly TWriteDbContext _db;
+    private readonly IInboxBypassScope _bypass;
 
-    public EfCoreInboxStore(TWriteDbContext db) => _db = db;
+    public EfCoreInboxStore(TWriteDbContext db, IInboxBypassScope bypass) {
+        _db = db;
+        _bypass = bypass;
+    }
 
     public async Task<InboxLease?> TryAcquireLeaseAsync(
         string tenantId,
@@ -37,7 +41,7 @@ ON CONFLICT (""TenantId"", ""ConsumerName"", ""MessageId"") DO NOTHING;
                           && x.ConsumerName == consumerName
                           && x.MessageId == messageId, ct);
 
-        if (existing.ProcessedOnUtc is not null)
+        if (existing.ProcessedOnUtc is not null && !_bypass.IsEnabled)
             return null;
 
         // 3) Acquire lease only if none exists OR expired

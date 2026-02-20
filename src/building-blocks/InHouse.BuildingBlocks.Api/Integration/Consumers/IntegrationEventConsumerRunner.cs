@@ -1,9 +1,10 @@
-﻿using System.Diagnostics;
-using InHouse.BuildingBlocks.Abstractions.Integration.Consumers;
+﻿using InHouse.BuildingBlocks.Abstractions.Integration.Consumers;
 using InHouse.BuildingBlocks.Abstractions.Integration.Events;
 using InHouse.BuildingBlocks.Abstractions.Integration.Inbox;
 using InHouse.BuildingBlocks.Abstractions.MultiTenancy;
+using InHouse.BuildingBlocks.Api.Integration.Inbox;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace InHouse.BuildingBlocks.Api.Integration.Consumers;
 
@@ -14,14 +15,17 @@ public sealed class IntegrationEventConsumerRunner
     private readonly IInboxStore _inbox;
     private readonly ITenantScopeFactory _tenantScopeFactory;
     private readonly ILogger<IntegrationEventConsumerRunner> _logger;
+    private readonly InboxBypassScope _bypassScope;
 
     public IntegrationEventConsumerRunner(
-        IInboxStore inbox,
-        ITenantScopeFactory tenantScopeFactory,
-        ILogger<IntegrationEventConsumerRunner> logger)
+    IInboxStore inbox,
+    ITenantScopeFactory tenantScopeFactory,
+    InboxBypassScope bypassScope,
+    ILogger<IntegrationEventConsumerRunner> logger)
     {
         _inbox = inbox;
         _tenantScopeFactory = tenantScopeFactory;
+        _bypassScope = bypassScope;
         _logger = logger;
     }
 
@@ -41,6 +45,12 @@ public sealed class IntegrationEventConsumerRunner
         activity?.SetTag("messaging.event_version", envelope.EventVersion);
         activity?.SetTag("tenant.id", envelope.TenantId);
         activity?.SetTag("consumer.name", handler.ConsumerName);
+
+        var forceReplay =
+            envelope.Headers?.TryGetValue("x-replay-force", out var fr) == true
+            && StringComparer.OrdinalIgnoreCase.Equals(fr, "true");
+
+        using var bypass = forceReplay ? _bypassScope.Enable() : null;
 
         // lease duration should be tuned; keep it small and rely on retries
         var lease = await _inbox.TryAcquireLeaseAsync(

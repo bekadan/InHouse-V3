@@ -1,20 +1,12 @@
 ﻿using InHouse.BuildingBlocks.Abstractions.Messaging;
 
-namespace InHouse.Jobs.Application.Auditing;
-
 public sealed record AuditLoggedIntegrationEvent(
-    Guid TenantId,
-    string? ActorId,
+    Guid AuditId,
+    string TenantId,
     string Action,
-    string Resource,
-    string? ResourceId,
-    bool Success,
-    string CorrelationId,
-    string RequestId,
-    string Source,
-    DateTime OccurredOnUtc,
-    string? MetadataJson
+    DateTime OccurredOnUtc
 ) : IIntegrationEvent
 {
-    public string EventType => "audit.logged.v1";
+    public string EventType => "Platform.AuditLogged";
+    public int EventVersion => 1;
 }

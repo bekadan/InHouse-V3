@@ -2,7 +2,6 @@
 using InHouse.BuildingBlocks.Abstractions.Messaging;
 using InHouse.BuildingBlocks.Persistence.Tenancy;
 using MediatR;
-using System.Threading;
 
 namespace InHouse.Jobs.Application.Auditing;
 

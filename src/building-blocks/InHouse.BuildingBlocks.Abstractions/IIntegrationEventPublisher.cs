@@ -1,6 +1,14 @@
-﻿namespace InHouse.BuildingBlocks.Abstractions.Messaging;
+﻿using InHouse.BuildingBlocks.Abstractions.Integration.Events;
+
+namespace InHouse.BuildingBlocks.Abstractions.Messaging;
 
 public interface IIntegrationEventPublisher
 {
-    Task PublishAsync(IIntegrationEvent @event, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Publishes the specified integration event envelope to the message bus.
+    /// The envelope must already contain all required transport metadata.
+    /// </summary>
+    Task PublishAsync(
+        IIntegrationEvent integrationEvent,
+        CancellationToken cancellationToken = default);
 }

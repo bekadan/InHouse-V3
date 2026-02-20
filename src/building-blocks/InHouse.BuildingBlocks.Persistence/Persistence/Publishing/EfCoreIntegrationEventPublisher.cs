@@ -1,91 +1,48 @@
-﻿using InHouse.BuildingBlocks.Abstractions.Integration.Bus;
-using InHouse.BuildingBlocks.Abstractions.Integration.Events;
+﻿using InHouse.BuildingBlocks.Abstractions.Integration.Events;
 using InHouse.BuildingBlocks.Abstractions.Messaging;
-using Microsoft.Extensions.Logging;
-using System.Diagnostics;
+using InHouse.BuildingBlocks.Persistence.Outbox;
+using InHouse.BuildingBlocks.Persistence.Tenancy;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
-namespace InHouse.BuildingBlocks.Api.Integration.Publishing;
+namespace InHouse.BuildingBlocks.Persistence.Integration.Publishing;
 
-/// <summary>
-/// Default integration event publisher that forwards envelopes
-/// to the configured message bus implementation (Kafka, etc.).
-/// 
-/// This class is transport-agnostic and relies on IMessageBusPublisher
-/// to perform the actual delivery.
-/// </summary>
-public sealed class MessageBusIntegrationEventPublisher : IIntegrationEventPublisher
+public sealed class EfCoreIntegrationEventPublisher : IIntegrationEventPublisher
 {
-    private static readonly ActivitySource ActivitySource =
-        new("InHouse.Integration.Publishing");
+    private readonly DbContext _dbContext;
+    private readonly ITenantProvider _tenantProvider;
 
-    private readonly IMessageBusPublisher _busPublisher;
-    private readonly ILogger<MessageBusIntegrationEventPublisher> _logger;
-
-    public MessageBusIntegrationEventPublisher(
-        IMessageBusPublisher busPublisher,
-        ILogger<MessageBusIntegrationEventPublisher> logger)
+    public EfCoreIntegrationEventPublisher(DbContext dbContext, ITenantProvider tenantProvider)
     {
-        _busPublisher = busPublisher ?? throw new ArgumentNullException(nameof(busPublisher));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+        _tenantProvider = tenantProvider ?? throw new ArgumentNullException(nameof(tenantProvider));
     }
 
-    /// <summary>
-    /// Publishes a fully constructed integration event envelope
-    /// to the configured message bus.
-    /// </summary>
-    public async Task PublishAsync(
-        IntegrationEventEnvelope envelope,
-        CancellationToken cancellationToken = default)
+    public Task PublishAsync(IIntegrationEvent @event, CancellationToken cancellationToken = default)
     {
-        if (envelope is null)
-            throw new ArgumentNullException(nameof(envelope));
+        if (@event is null)
+            throw new ArgumentNullException(nameof(@event));
 
-        using var activity = ActivitySource.StartActivity(
-            "integration.publish",
-            ActivityKind.Producer);
+        var tenantId = _tenantProvider.TenantId;
 
-        activity?.SetTag("messaging.system", "inhouse");
-        activity?.SetTag("messaging.destination_kind", "topic");
-        activity?.SetTag("messaging.message_id", envelope.MessageId);
-        activity?.SetTag("tenant.id", envelope.TenantId);
-        activity?.SetTag("messaging.event_type", envelope.EventType);
-        activity?.SetTag("messaging.event_version", envelope.EventVersion);
+        var eventType =
+            @event is IHasIntegrationEventType typed ? typed.EventType : @event.GetType().Name;
 
-        try
-        {
-            await _busPublisher.PublishAsync(envelope, cancellationToken)
-                               .ConfigureAwait(false);
+        var eventVersion = (@event as IVersionedIntegrationEvent)?.Version ?? 1;
+        var payloadJson = JsonSerializer.Serialize(@event, @event.GetType());
 
-            activity?.SetTag("integration.publish.success", true);
+        // ✅ OutboxMessage: new + set yok. Factory kullan.
+        var outbox = OutboxMessage.Create(
+            tenantId: tenantId,
+            eventType: eventType,
+            eventVersion: eventVersion,
+            occurredOnUtc: DateTime.UtcNow,
+            payloadJson: payloadJson);
 
-            _logger.LogInformation(
-                "Integration event published. MessageId={MessageId}, EventType={EventType}, TenantId={TenantId}",
-                envelope.MessageId,
-                envelope.EventType,
-                envelope.TenantId);
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            activity?.SetTag("integration.publish.cancelled", true);
+        _dbContext.Set<OutboxMessage>().Add(outbox);
 
-            _logger.LogWarning(
-                "Integration event publishing cancelled. MessageId={MessageId}",
-                envelope.MessageId);
-
-            throw;
-        }
-        catch (Exception ex)
-        {
-            activity?.SetTag("integration.publish.success", false);
-
-            _logger.LogError(
-                ex,
-                "Failed to publish integration event. MessageId={MessageId}, EventType={EventType}, TenantId={TenantId}",
-                envelope.MessageId,
-                envelope.EventType,
-                envelope.TenantId);
-
-            throw;
-        }
+        // IMPORTANT: SaveChanges burada çağrılmayabilir (komut transaction’ı içinde zaten çağrılıyor olabilir).
+        // Repoda event yazma SaveChanges interceptor/behavior ile yapılıyorsa burada çağırma.
+        return Task.CompletedTask;
     }
 }

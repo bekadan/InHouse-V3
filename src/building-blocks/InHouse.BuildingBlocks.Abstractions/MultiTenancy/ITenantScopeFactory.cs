@@ -2,5 +2,5 @@
 
 public interface ITenantScopeFactory
 {
-    IDisposable BeginScope(string tenantId);
+    IDisposable BeginScope(Guid tenantId);
 }

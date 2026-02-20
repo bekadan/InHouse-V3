@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\InHouse.BuildingBlocks.Abstractions\InHouse.BuildingBlocks.Abstractions.csproj" />
+    <ProjectReference Include="..\InHouse.BuildingBlocks.Persistence\InHouse.BuildingBlocks.Persistence.csproj" />
     <ProjectReference Include="..\InHouse.BuildingBlocks.Primitives\InHouse.BuildingBlocks.Primitives.csproj" />
   </ItemGroup>
 

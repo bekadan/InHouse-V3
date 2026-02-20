@@ -55,7 +55,7 @@ public sealed class KafkaMessageBusPublisher : IMessageBusPublisher, IDisposable
         var headers = new Headers
         {
             { "message-id", Encoding.UTF8.GetBytes(envelope.MessageId) },
-            { "tenant-id", Encoding.UTF8.GetBytes(envelope.TenantId) },
+            { "tenant-id", Encoding.UTF8.GetBytes(envelope.TenantId!.Value.ToString()) },
             { "event-type", Encoding.UTF8.GetBytes(envelope.EventType) },
             { "event-version", Encoding.UTF8.GetBytes(envelope.EventVersion.ToString()) }
         };
@@ -70,7 +70,7 @@ public sealed class KafkaMessageBusPublisher : IMessageBusPublisher, IDisposable
         {
             var result = await _producer.ProduceAsync(
                 _options.Topic,
-                new Message<string, byte[]> { Key = key, Value = value, Headers = headers },
+                new Message<string, byte[]> { Key = key!.Value.ToString(), Value = value, Headers = headers },
                 ct);
 
             activity?.SetTag("kafka.partition", result.Partition.Value);

@@ -72,7 +72,7 @@ public sealed class IntegrationEventConsumerRunner
 
         try
         {
-            using (_tenantScopeFactory.BeginScope(envelope.TenantId))
+            using (_tenantScopeFactory.BeginScope(envelope.TenantId!.Value))
             {
                 // version gate (we’ll extend into full versioning strategy next)
                 if (handler.EventType != envelope.EventType || handler.EventVersion != envelope.EventVersion)

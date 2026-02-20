@@ -4,6 +4,7 @@ using InHouse.BuildingBlocks.Application.Abstractions;
 using InHouse.BuildingBlocks.Persistence.Auditing;
 using InHouse.BuildingBlocks.Persistence.CompiledQueries;
 using InHouse.BuildingBlocks.Persistence.Idempotency;
+using InHouse.BuildingBlocks.Persistence.Integration.Publishing;
 using InHouse.BuildingBlocks.Persistence.Options;
 using InHouse.BuildingBlocks.Persistence.Outbox;
 using InHouse.BuildingBlocks.Persistence.UnitOfWork;

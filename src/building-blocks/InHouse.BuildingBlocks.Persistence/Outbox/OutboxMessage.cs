@@ -3,6 +3,9 @@
 public sealed class OutboxMessage
 {
     public Guid Id { get; private set; }
+    public Guid? TenantId { get; set; }
+    public string EventType { get; set; } = default!;
+    public int EventVersion { get; set; }
     public DateTime OccurredOnUtc { get; private set; }
     public string Type { get; private set; } = default!;
     public string PayloadJson { get; private set; } = default!;
@@ -34,6 +37,7 @@ public sealed class OutboxMessage
         HeadersJson = headersJson;
         CreatedOnUtc = createdOnUtc;
         AttemptCount = 0;
+        EventType = type;
     }
 
     public void MarkProcessed(DateTime processedOnUtc)
@@ -47,5 +51,42 @@ public sealed class OutboxMessage
         ProcessedOnUtc = null;
         AttemptCount++;
         Error = string.IsNullOrWhiteSpace(error) ? "Unknown error" : error;
+    }
+
+    public static OutboxMessage Create(
+        Guid? tenantId,
+        string eventType,
+        int eventVersion,
+        DateTime occurredOnUtc,
+        string payloadJson)
+    {
+        if (string.IsNullOrWhiteSpace(eventType)) throw new ArgumentException("eventType required", nameof(eventType));
+        if (string.IsNullOrWhiteSpace(payloadJson)) throw new ArgumentException("payloadJson required", nameof(payloadJson));
+
+        var message = new OutboxMessage();
+
+        message.SetCore(
+            tenantId,
+            eventType,
+            eventVersion,
+            occurredOnUtc,
+            payloadJson);
+
+        return message;
+    }
+
+    // ✅ private setters varsa bu yardımcı method ile tek yerden set edelim
+    private void SetCore(
+        Guid? tenantId,
+        string eventType,
+        int eventVersion,
+        DateTime occurredOnUtc,
+        string payloadJson)
+    {
+        TenantId = tenantId;
+        EventType = eventType;
+        EventVersion = eventVersion;
+        OccurredOnUtc = occurredOnUtc;
+        PayloadJson = payloadJson;
     }
 }

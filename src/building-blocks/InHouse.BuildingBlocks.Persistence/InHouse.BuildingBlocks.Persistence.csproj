@@ -16,4 +16,8 @@
     <ProjectReference Include="..\InHouse.BuildingBlocks.Application\InHouse.BuildingBlocks.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Integration\Publishing\" />
+  </ItemGroup>
+
 </Project>

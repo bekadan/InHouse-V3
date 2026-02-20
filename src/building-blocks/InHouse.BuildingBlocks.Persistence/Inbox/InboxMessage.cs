@@ -6,7 +6,7 @@ public sealed class InboxMessage
 {
     public long Id { get; private set; }
 
-    public required string TenantId { get; init; }
+    public required Guid? TenantId { get; init; }
     public required string ConsumerName { get; init; }
     public required string MessageId { get; init; }
 

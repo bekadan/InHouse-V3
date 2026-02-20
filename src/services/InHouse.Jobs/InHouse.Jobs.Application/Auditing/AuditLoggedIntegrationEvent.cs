@@ -2,7 +2,7 @@
 
 public sealed record AuditLoggedIntegrationEvent(
     Guid AuditId,
-    string TenantId,
+    Guid? TenantId,
     string Action,
     DateTime OccurredOnUtc
 ) : IIntegrationEvent

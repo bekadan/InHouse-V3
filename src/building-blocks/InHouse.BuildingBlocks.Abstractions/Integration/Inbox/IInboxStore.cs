@@ -13,7 +13,7 @@ public interface IInboxStore
     /// Returns null if the message was already processed OR another instance currently holds a valid lease.
     /// </summary>
     Task<InboxLease?> TryAcquireLeaseAsync(
-        string tenantId,
+        Guid? tenantId,
         string consumerName,
         string messageId,
         DateTime nowUtc,
@@ -21,7 +21,7 @@ public interface IInboxStore
         CancellationToken ct);
 
     Task MarkProcessedAsync(
-        string tenantId,
+        Guid? tenantId,
         string consumerName,
         string messageId,
         Guid leaseId,
@@ -29,7 +29,7 @@ public interface IInboxStore
         CancellationToken ct);
 
     Task RecordFailureAsync(
-        string tenantId,
+        Guid? tenantId,
         string consumerName,
         string messageId,
         Guid leaseId,

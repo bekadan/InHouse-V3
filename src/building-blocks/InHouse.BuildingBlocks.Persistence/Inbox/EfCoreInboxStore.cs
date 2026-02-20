@@ -15,7 +15,7 @@ public sealed class EfCoreInboxStore<TWriteDbContext> : IInboxStore
     }
 
     public async Task<InboxLease?> TryAcquireLeaseAsync(
-        string tenantId,
+        Guid? tenantId,
         string consumerName,
         string messageId,
         DateTime nowUtc,
@@ -77,7 +77,7 @@ ON CONFLICT (""TenantId"", ""ConsumerName"", ""MessageId"") DO NOTHING;
     }
 
     public async Task MarkProcessedAsync(
-        string tenantId,
+        Guid? tenantId,
         string consumerName,
         string messageId,
         Guid leaseId,
@@ -102,7 +102,7 @@ ON CONFLICT (""TenantId"", ""ConsumerName"", ""MessageId"") DO NOTHING;
     }
 
     public async Task RecordFailureAsync(
-        string tenantId,
+        Guid? tenantId,
         string consumerName,
         string messageId,
         Guid leaseId,

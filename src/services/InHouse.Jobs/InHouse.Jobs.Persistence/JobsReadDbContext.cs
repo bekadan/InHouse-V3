@@ -43,6 +43,18 @@ public sealed class JobsReadDbContext : DbContext
 
             builder.HasIndex(j => j.CompanyId);
             builder.HasIndex(j => j.CreatedOnUtc);
+
+        });
+
+        modelBuilder.Entity<JobListItem>(b =>
+        {
+            b.HasKey(x => x.Id);
+
+            b.Property(x => x.SearchVector)
+                .HasColumnType("tsvector");
+
+            b.Property(x => x.Embedding)
+                .HasColumnType("vector(1536)");
         });
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(JobsReadDbContext).Assembly);

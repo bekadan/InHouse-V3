@@ -51,17 +51,10 @@ public sealed class AuditCommandBehavior<TRequest, TResponse>
             {
                 await _publisher.PublishAsync(
                     new AuditLoggedIntegrationEvent(
+                        AuditId: Guid.NewGuid(),
                         TenantId: tenantId,
-                        ActorId: ec.ActorId,
                         Action: auditable.Action,
-                        Resource: auditable.Resource,
-                        ResourceId: auditable.ResourceId,
-                        Success: true,
-                        CorrelationId: ec.CorrelationId,
-                        RequestId: ec.RequestId,
-                        Source: ec.Source,
-                        OccurredOnUtc: started,
-                        MetadataJson: null),
+                        OccurredOnUtc:DateTime.Now),
                     cancellationToken);
             }
 
@@ -73,17 +66,10 @@ public sealed class AuditCommandBehavior<TRequest, TResponse>
             {
                 await _publisher.PublishAsync(
                     new AuditLoggedIntegrationEvent(
+                        AuditId: Guid.NewGuid(),
                         TenantId: tenantId,
-                        ActorId: ec.ActorId,
                         Action: auditable.Action,
-                        Resource: auditable.Resource,
-                        ResourceId: auditable.ResourceId,
-                        Success: false,
-                        CorrelationId: ec.CorrelationId,
-                        RequestId: ec.RequestId,
-                        Source: ec.Source,
-                        OccurredOnUtc: started,
-                        MetadataJson: null),
+                        OccurredOnUtc: started),
                     cancellationToken);
             }
 

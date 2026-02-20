@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/building-blocks/">
+    <Project Path="src/building-blocks/InHouse.BuildingBlocks.Abstractions/InHouse.BuildingBlocks.Abstractions.csproj" />
+    <Project Path="src/building-blocks/InHouse.BuildingBlocks.Api/InHouse.BuildingBlocks.Api.csproj" Id="92614c64-5525-47e6-9110-cc8f2c2009af" />
+    <Project Path="src/building-blocks/InHouse.BuildingBlocks.Application/InHouse.BuildingBlocks.Application.csproj" />
+    <Project Path="src/building-blocks/InHouse.BuildingBlocks.Domain/InHouse.BuildingBlocks.Domain.csproj" />
+    <Project Path="src/building-blocks/InHouse.BuildingBlocks.Messaging/InHouse.BuildingBlocks.Messaging.csproj" />
+    <Project Path="src/building-blocks/InHouse.BuildingBlocks.Persistence/InHouse.BuildingBlocks.Persistence.csproj" />
+    <Project Path="src/building-blocks/InHouse.BuildingBlocks.Primitives/InHouse.BuildingBlocks.Primitives.csproj" />
+  </Folder>
+  <Folder Name="/src/services/" />
+  <Folder Name="/src/services/InHouse.Jobs/">
+    <Project Path="src/services/InHouse.Jobs/InHouse.Jobs.Api/InHouse.Jobs.Api.csproj" Id="d666871f-d458-4f7e-8e03-62a08368a173" />
+    <Project Path="src/services/InHouse.Jobs/InHouse.Jobs.Application/InHouse.Jobs.Application.csproj" Id="8575a8ef-3d46-4783-a9fe-e7d6f974f184" />
+    <Project Path="src/services/InHouse.Jobs/InHouse.Jobs.Domain/InHouse.Jobs.Domain.csproj" Id="d9063200-7621-4a61-81cd-1ded75adc548" />
+    <Project Path="src/services/InHouse.Jobs/InHouse.Jobs.Persistence/InHouse.Jobs.Persistence.csproj" Id="dced2231-cfc9-4d44-b780-c5fcff75eab9" />
+  </Folder>
+</Solution>
